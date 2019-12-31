@@ -1,6 +1,6 @@
 'use strict';
 const http = require('http');
-const port = process.env.PORT || 1337;
+const port = process.env.PORT || 1338;
 const Twit = require('twit');
 const config = require('./config.js');
 

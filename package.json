@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "SearchLinkBot",
   "repository": "https://github.com/HarleyBartles/search-link-bot.git",
-  "license": "GNU GENERAL PUBLIC LICENSE V3",
+  "license": "GPL-2.0-or-later",
   "main": "server.js",
   "author": {
     "name": "harley bartles"
