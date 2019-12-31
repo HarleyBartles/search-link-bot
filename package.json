@@ -1,0 +1,18 @@
+{
+  "name": "search-link-bot",
+  "version": "0.0.0",
+  "description": "SearchLinkBot",
+  "repository": "https://github.com/HarleyBartles/search-link-bot.git",
+  "license": "GNU GENERAL PUBLIC LICENSE V3",
+  "main": "server.js",
+  "author": {
+    "name": "harley bartles"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "lodash": "^4.17.15",
+    "moment": "^2.24.0",
+    "twit": "^2.2.11"
+  }
+}
