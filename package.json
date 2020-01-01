@@ -4,7 +4,7 @@
   "description": "SearchLinkBot",
   "repository": "https://github.com/HarleyBartles/search-link-bot.git",
   "license": "GPL-2.0-or-later",
-  "main": "server.js",
+  "main": "search-link-bot.js",
   "author": {
     "name": "harley bartles"
   },
