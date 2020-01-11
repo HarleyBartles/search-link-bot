@@ -7,8 +7,7 @@ const config = require('./config.js');
 const T = new Twit(config);
 
 const excludedAccounts = [
-    herecomescunty,
-    harleybartles,
+    'herecomescunty',
 ]
 
 let requestor = null
