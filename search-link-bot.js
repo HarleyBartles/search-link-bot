@@ -46,6 +46,7 @@ const mentionEvent = async (tweet) => {
     names.push(tweet.user.screen_name)
 
     let reply = replyTo(names)
+    reply += "Here it is! It's all your tweets! What's not to love? "
     reply += makeLink(tweet.user.screen_name)
     
     postReply(reply, tweet.id_str);
