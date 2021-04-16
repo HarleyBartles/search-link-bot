@@ -31,15 +31,18 @@ const mentionEvent = async (tweet) => {
     let names = tweet.entities.user_mentions.map(u => u.screen_name.toLowerCase())
     requestor = { ...tweet.user }
     
-    if ( 
-        excludedAccounts.contains(tweet.user.screen_name.toLowerCase()) 
-        || !names.includes(config.self_user_name.toLowerCase)
-        || alreadyReplied(tweet) 
-        ){
+    //
+    const isLinkRequest = names.includes(config.self_user_name.toLowerCase())
+    const isTestRequest = excludedAccounts.includes(tweet.user.screen_name.toLowerCase())
+    const replied = await alreadyReplied(tweet)
+
+    if (!isLinkRequest || isTestRequest || replied){
             return
         }
     
+    // remove self from the replyTo list
     names = names.filter(n => n.toLowerCase() != config.self_user_name.toLowerCase())
+    // add the user who tweeted to the replyTo list
     names.push(tweet.user.screen_name)
 
     let reply = replyTo(names)
@@ -61,6 +64,9 @@ const getParentTweet = (tweet) => {
 }
 
 const alreadyReplied = async (tweet) => {
+    if (tweet.in_reply_to_status_id_str == null)
+        return false;
+
     const parent = await getParentTweet(tweet)
     
     if (parent.user.screen_name.toLowerCase() == config.self_user_name.toLowerCase()){
