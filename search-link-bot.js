@@ -1,6 +1,6 @@
 'use strict';
 const http = require('http');
-const port = process.env.PORT || 1338;
+const port = process.env.PORT || 1339;
 const Twit = require('twit');
 const config = require('./config.js');
 
@@ -46,7 +46,7 @@ const mentionEvent = async (tweet) => {
     names.push(tweet.user.screen_name)
 
     let reply = replyTo(names)
-    reply += "Here it is! It's all your tweets! What's not to love? "
+    reply += `Here it is ${tweet.user.screen_name}! It's all your tweets! What's not to love? `
     reply += makeLink(tweet.user.screen_name)
     
     postReply(reply, tweet.id_str);
