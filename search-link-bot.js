@@ -32,7 +32,7 @@ const mentionEvent = async (tweet) => {
     requestor = { ...tweet.user }
     
     //
-    const isLinkRequest = names.includes(config.self_user_name.toLowerCase()) && tweet.text.toLowerCase().includes("link")
+    const isLinkRequest = names.includes(config.self_user_name.toLowerCase()) && tweet.text.toLowerCase().includes("link") && !tweet.text.toLowerCase().includes("rt @")
     const isTestRequest = excludedAccounts.includes(requestor.screen_name.toLowerCase())
     const isFirstRequest = hasNoParent(tweet)
 
