@@ -32,22 +32,21 @@ const mentionEvent = async (tweet) => {
     requestor = { ...tweet.user }
     
     //
-    const isLinkRequest = names.includes(config.self_user_name.toLowerCase())
-    const isTestRequest = excludedAccounts.includes(tweet.user.screen_name.toLowerCase())
-    const replied = await alreadyReplied(tweet)
+    const isLinkRequest = names.includes(config.self_user_name.toLowerCase()) && tweet.text.toLowerCase().includes("link")
+    const isTestRequest = excludedAccounts.includes(requestor.screen_name.toLowerCase())
     const isFirstRequest = hasNoParent(tweet)
 
-    if (!isFirstRequest || !isLinkRequest || isTestRequest || replied){
+    if (!isFirstRequest || !isLinkRequest || isTestRequest){
             return
         }
     
     // remove self from the replyTo list
     names = names.filter(n => n.toLowerCase() != config.self_user_name.toLowerCase())
     // add the user who tweeted to the replyTo list
-    names.push(tweet.user.screen_name)
+    names.push(requestor.screen_name)
 
     let reply = replyTo(names)
-    reply += `Here it is ${tweet.user.screen_name}! It's all your tweets! What's not to love? `
+    reply += `Here it is ${requestor.screen_name}! It's all your tweets! What's not to love? `
     reply += makeLink(tweet.user.screen_name)
     
     postReply(reply, tweet.id_str);
