@@ -35,7 +35,7 @@ const mentionEvent = async (tweet) => {
     const isLinkRequest = names.includes(config.self_user_name.toLowerCase())
     const isTestRequest = excludedAccounts.includes(tweet.user.screen_name.toLowerCase())
     const replied = await alreadyReplied(tweet)
-    isFirstRequest = hasNoParent(tweet)
+    const isFirstRequest = hasNoParent(tweet)
 
     if (!isFirstRequest || !isLinkRequest || isTestRequest || replied){
             return
