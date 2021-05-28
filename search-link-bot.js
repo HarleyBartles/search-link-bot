@@ -3,74 +3,70 @@ const http = require('http');
 const port = process.env.PORT || 1339;
 const Twit = require('twit');
 const config = require('./config.js');
+const logger = require('./logger')
 
 const T = new Twit(config);
 
 const excludedAccounts = [
-    'herecomescunty',
+    'harleybartles',
 ]
 
 let requestor = null
 
-const replyTo = (names) => names.map(name => `@${name} `).join("")
-const makeLink = (userName) => `https://twitter.com/search?q=from:${userName}%20-filter:replies`
-const isReplyToRequestor = (tweet) => tweet.user.screen_name === requestor.screen_name
-
 const server = http.createServer(function (req, res) {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end("Listening");
+    res.end("Listening")
 });
 
-server.listen(port);
+server.listen(port)
 
-const mentions = T.stream('statuses/filter', { track: `${config.self_user_name}` });
+//ToDo - add support for DM replies
 
-mentions.on('tweet', (tweet) => mentionEvent(tweet));
+const mentions = T.stream('statuses/filter', { track: `${config.self_user_name}` })
 
-const mentionEvent = async (tweet) => {
+mentions.on('tweet', (tweet) => handleMention(tweet))
+
+const handleMention = async (tweet) => {
     let names = tweet.entities.user_mentions.map(u => u.screen_name.toLowerCase())
     requestor = { ...tweet.user }
     
-    //
-    const isLinkRequest = names.includes(config.self_user_name.toLowerCase()) && tweet.text.toLowerCase().includes("link") && !tweet.text.toLowerCase().includes("rt @")
+    const isReTweet = tweet.text.toLowerCase().includes("rt @")
     const isTestRequest = excludedAccounts.includes(requestor.screen_name.toLowerCase())
-    const isFirstRequest = hasNoParent(tweet)
+    // only reply to OG tweets, not replies (for now)
+    //ToDo: store thread id's and userids to better not reply over and over in threads every time someone replies
+    const isReply = hasParent(tweet) 
 
-    if (!isFirstRequest || !isLinkRequest || isTestRequest){
-            return
-        }
+    if (isReply || isReTweet || isTestRequest){
+        logger.info("Mention not handled")
+        return
+    }
     
-    // remove self from the replyTo list
+    // remove self and add the user who tweeted to the replyTo list
     names = names.filter(n => n.toLowerCase() != config.self_user_name.toLowerCase())
-    // add the user who tweeted to the replyTo list
     names.push(requestor.screen_name)
 
-    let reply = replyTo(names)
-    reply += `Here it is ${requestor.screen_name}! It's all your tweets! What's not to love? `
+    let reply = makeReplyToList(names)
+    reply += `Here it is ${requestor.screen_name}! It's all your tweets! What's not to love? ` //ToDo: add an array of messages and randomise for variance
     reply += makeLink(tweet.user.screen_name)
     
-    postReply(reply, tweet.id_str);
-    
-};
-
-const getParentTweet = (tweet) => {
-    return T.get('statuses/show', { id: tweet.in_reply_to_status_id_str })
-        .then(res => {
-            return res.data
-        })
-        .catch(err => {
-            console.log(err)
-            return err
-        })
+    postReply(reply, tweet.id_str)
 }
 
-const hasNoParent = (tweet) => {
-    if (tweet.in_reply_to_status_id_str == null)
-        return true
-    
-    return false;
-}
+const makeReplyToList = (names) => names.map(name => `@${name} `).join("")
+const makeLink = (userName) => `https://twitter.com/search?q=from:${userName}%20-filter:replies` // ToDo, allow keywords as params to shape the link
+const isReplyToRequestor = (tweet) => tweet.user.screen_name === requestor.screen_name
+const hasParent = (tweet) => tweet.in_reply_to_status_id_str !== null
+const postReply = (reply, replyTo) => T.post('statuses/update', { status: reply, in_reply_to_status_id: replyTo }, tweeted)
+const tweeted = (err, reply) => err !== undefined
+    ? logger.error(err)
+    : logger.info(`Tweeted: ${reply}`)
+const getParentTweet = (tweet) => T.get('statuses/show', { id: tweet.in_reply_to_status_id_str })
+    .then(result => { return result.data })
+    .catch(ex => { logger.error(ex); return ex })
 
+// defunct
+// ToDo: start storing tweet id's we've already replied to
+// then write proper methods to traverse up a thread getting a tweet ID array to see if we've already replied in this thread
 const alreadyReplied = async (tweet) => {
     if (tweet.in_reply_to_status_id_str == null)
         return false;
@@ -88,15 +84,3 @@ const alreadyReplied = async (tweet) => {
         ? await alreadyReplied(parent)
         : false
 }
-
-const postReply = (reply, replyTo) => {
-    T.post('statuses/update', { status: reply, in_reply_to_status_id: replyTo }, tweeted);
-};
-
-const tweeted = (err, reply) => {
-    if (err !== undefined) {
-        console.log(err);
-    } else {
-         console.log('Tweeted: ' + reply);
-    }
-};
