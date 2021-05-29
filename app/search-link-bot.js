@@ -2,9 +2,10 @@
 const http = require('http');
 const port = process.env.PORT || 1339;
 const Twit = require('twit');
+const { log } = require('util');
 const config = require('./config.js');
-const logger = require('./logger')
-
+const winstonLogger = require('./logger')
+const logger = winstonLogger.logger
 const T = new Twit(config);
 
 const excludedAccounts = [
@@ -14,6 +15,7 @@ const excludedAccounts = [
 let requestor = null
 
 const server = http.createServer(function (req, res) {
+    logger.info("starting")
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end("Listening")
 });

@@ -1,0 +1,34 @@
+version: '3.3'
+
+services: 
+
+    db:
+        image: percona/percona-server:latest
+        container_name: perconaserver
+        restart: always
+        volumes:
+        # create volumes for use
+        - db-config:/etc/mysql
+        - db-data:/var/lib/mysql
+        - ./db/backup/files/:/data_backup/data
+        env_file: sqlconnection.env
+        #environment:
+        ports:
+        - "3306"
+        command:
+        # Workaround for no my.cnf in image
+            - '--user=mysql'
+
+    app:
+        build:
+            context: .
+            dockerfile: ./app/Dockerfile
+        image: node-searchlink-bot
+        depends_on:
+        - db
+        stdin_open: true
+        tty: true
+
+volumes: 
+  db-config:
+  db-data:
